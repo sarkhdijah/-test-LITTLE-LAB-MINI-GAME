@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel ="stylesheet" href="style_test.css"/>
+<title>🧬 Haiwan Misteri - Little Lab 🐾</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    background-color: #400040;
+    color:#ffdb99;
+    overflow-x: hidden;
+  }
+   /*.logoBackground{
+    /* background-color: #f9e7c0;*/
+  }
+
+  h1 {
+    font-size: 2em;
+    color: #f09914;
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  h2 {
+    color: #ffdb99;
+    font-size: 1.2em;
+  }
+
+  button {
+    font-size: 20px;
+    margin: 8px;
+    padding: 12px 25px;
+    border: none;
+    background-color:#ffae19;
+    color:  #210808;
+    cursor: pointer;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+  }
+
+  button:hover {
+    transform: scale(1.1);
+    background-color: #ffae19;
+  }
+
+  #sequence {
+    font-size: 26px;
+    font-family: monospace;
+    margin: 20px;
+    color: #ffc966;
+    font-weight: bold;
+  }
+
+  #userSequenceDisplay {
+    font-size: 22px;
+    font-family: monospace;
+    color:#7bc043;
+    font-weight: bold;
+  }
+
+  #progressBar {
+    width: 60%;
+    height: 20px;
+    background-color: #ededeb;
+    margin: 20px auto;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid#007300;
+  }
+
+  #progress {
+    width: 0%;
+    height: 100%;
+    background-color:#008d00;
+    transition: width 0.4s ease;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  #splash img {
+    width: 120px;
+    border-radius: 50%;
+    margin-top: 30px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  #animalReveal {
+    font-size: 28px;
+    animation: pop 1s ease-in-out;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .confetti {
+    position: fixed;
+    top: -10px;
+    width: 10px;
+    height: 10px;
+    background:#ff506f;
+    animation: fall 3s linear infinite;
+  }
+
+  @keyframes fall {
+    to {
+      transform: translateY(100vh) rotate(720deg);
+    }
+  }
+</style>
+</head>
+<body>
+   <audio controls autoplay>
+    <source src="C:\Users\sarah\Downloads\retro-arcade-game-music-297305.mp3" type="audio/mpeg"> Your browser does not support audio element
+  </audio>
+
+<!-- Splash Screen -->
+<div id="splash">
+  <div class = "logoBackground">
+  <div id="littleLabIcon">
+  <img src="C:\Users\sarah\Downloads\littlelab_icon.png" alt="littlelab_icon" width="120">
+  </div>
+</div>
+
+  <h2 style="color:#b2c5b2; font-family: Garamond">Little Lab by Helixora</h2>
+  <h1 style="color: #ffae19"> 🧬 TEKA HAIWAN MISTERI 🐾</h1>
+  <button onclick="startGame()">Start!</button>
+</div>
+
+<!-- Game Screen -->
+<div id="game" class="hidden">
+  <h2>Pilih nukleotida mengikut jujukan di bawah untuk meneka haiwan misteri:</h2>
+  <p id="sequence"><b>T G A A T G</b></p>
+
+  <div id="button_answer">
+    <button id="A" onclick="checkNucleotide('A')">A</button>
+    <button id="C" onclick="checkNucleotide('C')">C</button>
+    <button id="G" onclick="checkNucleotide('G')">G</button>
+    <button id="T" onclick="checkNucleotide('T')">T</button>
+  </div>
+
+  <div id="progressBar"><div id="progress"></div></div>
+  <p>Jujukan anda: <span id="userSequenceDisplay"></span></p>
+</div>
+
+<!-- Result Screen -->
+<div id="result" class="hidden">
+  <h2 id="animalReveal"></h2>
+  <img id="animalImg" width="180" style="border-radius:20px; box-shadow:0 4px 8px rgba(0,0,0,0.2);" />
+  <br><br>
+  <button onclick="restartGame()">Main Semula 🔁</button>
+</div>
+
+<!-- Sounds -->
+<audio id="correctSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+<audio id="wrongSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="winSound" src="https://actions.google.com/sounds/v1/cartoon/slide_whistle_to_drum_hit.ogg"></audio>
+
+<!-- Background Music -->
+<audio id="bgMusic" src="https://cdn.pixabay.com/audio/2021/09/16/audio_9f2c3b043d.mp3" loop></audio>
+
+<script>
+  const correctSeq = "ACTTAC";
+  let index = 0;
+  let userSeq = "";
+  let bgMusic = document.getElementById("bgMusic");
+
+  function startGame() {
+    document.getElementById("splash").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+    index = 0;
+    userSeq = "";
+    document.getElementById("userSequenceDisplay").innerText = "";
+    document.getElementById("progress").style.width = "0%";
+
+    // Play background music (starts once user interacts)
+    bgMusic.volume = 0.3;
+    bgMusic.play();
+  }
+
+  function checkNucleotide(nuc) {
+    const correctSound = document.getElementById("correctSound");
+    const wrongSound = document.getElementById("wrongSound");
+
+    if (nuc === correctSeq[index]) {
+      correctSound.play();
+      userSeq += nuc;
+      index++;
+      document.getElementById("userSequenceDisplay").innerText = userSeq;
+      document.getElementById("progress").style.width = (index / correctSeq.length) * 100 + "%";
+
+      const btn = document.getElementById(nuc);
+      btn.style.backgroundColor = "#b9f6ca";
+      setTimeout(() => btn.style.backgroundColor = "#ffd54f", 400);
+
+      if (index === correctSeq.length) {
+        setTimeout(showResult, 500);
+      }
+    } else {
+      wrongSound.play();
+      flashMessage("❌ Ops! Salah! Cuba lagi, adiwira sains!");
+      resetGameProgress();
+    }
+  }
+
+  function flashMessage(text) {
+    const msg = document.createElement("div");
+    msg.innerText = text;
+    msg.style.background = "#ff7f7f";
+    msg.style.color = "#200020";
+    /*msg.style.padding = "10px";
+    msg.style.margin = "10px auto";
+    msg.style.width = "60%";
+    msg.style.borderRadius = "10px";*/
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 1500);
+  }
+
+  function resetGameProgress() {
+    userSeq = "";
+    index = 0;
+    document.getElementById("userSequenceDisplay").innerText = "";
+    document.getElementById("progress").style.width = "0%";
+  }
+
+  function showResult() {
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("result").classList.remove("hidden");
+    document.getElementById("winSound").play();
+
+    // Confetti animation
+    for (let i = 0; i < 30; i++) {
+      const confetti = document.createElement("div");
+      confetti.classList.add("confetti");
+      confetti.style.left = Math.random() * 100 + "vw";
+      confetti.style.background = `hsl(${Math.random() * 360}, 100%, 70%)`;
+      confetti.style.animationDuration = Math.random() * 3 + 2 + "s";
+      document.body.appendChild(confetti);
+      setTimeout(() => confetti.remove(), 5000);
+    }
+
+    document.getElementById("animalReveal").innerHTML = "🎉 Hebat! Haiwan Misteri ialah <b>GAJAH 🐘 </b>";
+    document.getElementById("animalImg").src = "https://i.pinimg.com/736x/a1/4b/4e/a14b4e445b5b624b4d6305a54410a415.jpg";
+  }
+
+  function restartGame() {
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("splash").classList.remove("hidden");
+    resetGameProgress();
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+  }
+</script>
+</body>
+</html>
